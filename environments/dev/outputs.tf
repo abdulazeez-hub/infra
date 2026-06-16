@@ -30,10 +30,10 @@ output "private_subnet_2_id" {
   value = module.vpc.private_subnet_2_id
 }
 
-output "endpoint" {
-  value = aws_db_instance.this.endpoint
+output "rds_endpoint" {
+  value = module.rds.endpoint
 }
 
-output "db_instance_id" {
-  value = aws_db_instance.this.id
+output "rds_instance_id" {
+  value = module.rds.db_instance_id
 }
