@@ -1,0 +1,45 @@
+name: Terraform Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - name: Terraform Init
+        working-directory: environments/${{ github.event.inputs.environment }}
+        run: |
+          terraform init \
+            -backend-config=backend-${{ github.event.inputs.environment }}.hcl
+
+      - name: Terraform Apply
+        working-directory: environments/${{ github.event.inputs.environment }}
+        run: terraform apply -auto-approve
